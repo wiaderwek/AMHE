@@ -20,7 +20,6 @@ def load_txt(demands_path):
 
 
 g = load_data("D:\Tomek\PW-informatyka\Magisterka\SEM2\AMHE\projekt\przykladowe_dane\gen_50_d_2.xml", "D:\Tomek\PW-informatyka\Magisterka\SEM2\AMHE\projekt\przykladowe_dane\gen_50_d_2_0_4_1.txt")
-for link in g._links:
-    print(link[0].text, link[1].text)
 
 print(g.is_path_correct(['N1', 'N2', 'N3']))
+print(g.is_path_correct(['N1', 'N39', 'N2']))
