@@ -1,6 +1,6 @@
 class Graph:
     def __init__(self, links, demands):
-        self._links= self.load_links_to_map(links)
+        self._links = self.load_links_to_map(links)
         self._demands = demands
 
     def is_path_correct(self, path):
@@ -24,3 +24,10 @@ class Graph:
         print(graph)
         return graph
 
+    def get_number_of_vertices(self):
+        return len(self._links)
+
+    def get_vertex_by_index(self, idx):
+        if idx != 0 and idx < self.get_number_of_vertices():
+            return list(self._links.keys())[idx]
+        return None

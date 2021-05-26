@@ -1,0 +1,5 @@
+SIZE_OF_POPULATION = 10
+BITS_FOR_VERTEX = 8
+
+SHORTEST = "shortest"
+BEST = "best"
