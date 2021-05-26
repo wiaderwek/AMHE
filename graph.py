@@ -28,6 +28,6 @@ class Graph:
         return len(self._links)
 
     def get_vertex_by_index(self, idx):
-        if idx != 0 and idx < self.get_number_of_vertices():
+        if idx < self.get_number_of_vertices():
             return list(self._links.keys())[idx]
         return None

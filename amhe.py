@@ -57,11 +57,18 @@ def get_path_as_numbers(path, graph):
     for i in range(0, len(path) - 1, BITS_FOR_VERTEX):
         number = 0;
         for j in range(BITS_FOR_VERTEX - 1):
-            number += 2 ** (BITS_FOR_VERTEX - j - 1)
+            number += path[i + j] * 2 ** (BITS_FOR_VERTEX - j - 1)
         path_as_vertices.append(graph.get_vertex_by_index(number))
 
     return path_as_vertices
 
 
 population = gen_population(g)
+print("Number of vertices: {}".format(g.get_number_of_vertices()))
 print(get_member_as_vertices(population[0], g))
+
+for member in population:
+    vertices = get_member_as_vertices(member, g)
+
+    if not all(x is None for x in vertices[SHORTEST]) or not all(x is None for x in vertices[BEST]):
+        print(vertices)
