@@ -1,7 +1,6 @@
 import xml.etree.ElementTree as ET
-import random
 from graph import Graph
-from constants import *
+from evolution import *
 
 
 def load_data(graph_path, demands_path):
@@ -67,8 +66,14 @@ population = gen_population(g)
 print("Number of vertices: {}".format(g.get_number_of_vertices()))
 print(get_member_as_vertices(population[0], g))
 
-for member in population:
-    vertices = get_member_as_vertices(member, g)
+# for member in population:
+#     vertices = get_member_as_vertices(member, g)
+#
+#     if not all(x is None for x in vertices[SHORTEST]) or not all(x is None for x in vertices[BEST]):
+#         print(vertices)
 
-    if not all(x is None for x in vertices[SHORTEST]) or not all(x is None for x in vertices[BEST]):
-        print(vertices)
+reproduced_members = reproduce_members(population[0], population[1])
+print("Reproduced members: {}".format(reproduced_members))
+mutated_members = mutate(reproduced_members)
+print("Mutated members: {}".format(mutated_members))
+
