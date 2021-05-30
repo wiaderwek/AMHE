@@ -5,7 +5,7 @@ from graph import Graph
 
 
 class CostFunc():
-  # Set cost to be inxinity
+  # Set cost to be infinity
   _cost: float = float('inf')
 
   def __init__(self,
@@ -37,9 +37,9 @@ class CostFunc():
     return self._cost
 
   def _calc_cost(self) -> float:
-    self._set_cost(self._cost_func() + self._penalise_flow_conservation() +
-                   self._penalise_overloadepath_ds() +
-                   self._penalise_invalipath_ds())
+    self._set_cost(self._cost_func() + self._penalize_flow_conservation() +
+                   self._penalize_overloadepath_ds() +
+                   self._penalize_invalipath_ds())
     return self.get_cost()
 
   def _cost_func(self) -> float:
@@ -58,13 +58,13 @@ class CostFunc():
   def _calc_common_arcs(self) -> int:
     pass
 
-  def _penalise_flow_conservation(self) -> float:
+  def _penalize_flow_conservation(self) -> float:
     pass
 
-  def _penalise_overloadepath_ds(self) -> float:
+  def _penalize_overloadepath_ds(self) -> float:
     pass
 
-  def _penalise_invalipath_ds(self) -> float:
+  def _penalize_invalipath_ds(self) -> float:
     pass
 
   def _get_arcs(self) -> List[Tuple[int, int]]:
