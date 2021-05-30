@@ -38,8 +38,8 @@ class CostFunc():
 
   def _calc_cost(self) -> float:
     self._set_cost(self._cost_func() + self._penalize_flow_conservation() +
-                   self._penalize_overloadepath_ds() +
-                   self._penalize_invalipath_ds())
+                   self._penalize_overloadepaths() +
+                   self._penalize_invalipaths())
     return self.get_cost()
 
   def _cost_func(self) -> float:
@@ -61,10 +61,10 @@ class CostFunc():
   def _penalize_flow_conservation(self) -> float:
     pass
 
-  def _penalize_overloadepath_ds(self) -> float:
+  def _penalize_overloadepaths(self) -> float:
     pass
 
-  def _penalize_invalipath_ds(self) -> float:
+  def _penalize_invalipaths(self) -> float:
     pass
 
   def _get_arcs(self) -> List[Tuple[int, int]]:
