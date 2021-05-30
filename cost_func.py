@@ -46,14 +46,18 @@ class CostFunc():
     return self.get_cost()
 
   def _cost_func(self) -> float:
+
+    if len(self._arcs_x) == 0 or len(self._arcs_y) == 0:
+      return self.get_cost()
+
     priority_objective = self._t * (self._xi_x + self._xi_y)
     # Num of arcs is equal to num of vertices - 1
+
     path_x_cost = self._xi_x / len(self._arcs_x)
-    path_y_cost = exp(
-        self._xi_y *
+    path_y_cost = self._xi_y * exp(
         sum([log(1. - self._get_used_bandwidth(arc)) for arc in self._arcs_y]))
 
-    return priority_objective - path_x_cost - path_y_cost
+    return priority_objective + path_x_cost + path_y_cost
 
   def _get_used_bandwidth(self, arc: Tuple[int, int]) -> float:
     return self._graph.get_arc_bandwitdth(arc)
@@ -86,19 +90,19 @@ class CostFunc():
 
   def _penalize_invalid_paths(self) -> float:
     penalty = 0.
-    penalty += INVALID_PATH_PENALTY if self._graph.is_path_correct(
-        self._path_x) else 0
-    penalty += INVALID_PATH_PENALTY if self._graph.is_path_correct(
-        self._path_y) else 0
+    penalty += 0 if self._graph.is_path_correct(
+        self._path_x) else INVALID_PATH_PENALTY
+    penalty += 0 if self._graph.is_path_correct(
+        self._path_y) else INVALID_PATH_PENALTY
 
     return penalty
 
   def _penalize_invalid_source_and_destination(self) -> float:
     penalty = 0.
-    penalty += INVALID_SOURCE_AND_DESTINATION_PENALTY if self._graph.is_source_and_destination_correct(
-        self._path_x[0], self._path_x[-1]) else 0
-    penalty += INVALID_SOURCE_AND_DESTINATION_PENALTY if self._graph.is_source_and_destination_correct(
-        self._path_y[0], self._path_y[-1]) else 0
+    penalty += 0 if self._graph.is_source_and_destination_correct(
+        self._path_x[0], self._path_x[-1]) else INVALID_SOURCE_AND_DESTINATION_PENALTY
+    penalty += 0 if self._graph.is_source_and_destination_correct(
+        self._path_y[0], self._path_y[-1]) else INVALID_SOURCE_AND_DESTINATION_PENALTY
 
     return penalty
 
