@@ -57,7 +57,8 @@ class CostFunc():
     path_y_cost = self._xi_y * exp(
         sum([log(1. - self._get_used_bandwidth(arc)) for arc in self._arcs_y]))
 
-    return priority_objective + path_x_cost + path_y_cost
+    return priority_objective - path_x_cost - path_y_cost
+    #return -path_x_cost
 
   def _get_used_bandwidth(self, arc: Tuple[int, int]) -> float:
     return self._graph.get_arc_bandwitdth(arc)
@@ -106,5 +107,5 @@ class CostFunc():
 
     return penalty
 
-  def _get_arcs(self, path: List[int]) -> List[Tuple[int, int]]:
-    return [(path[i], path[i + 1]) for i in range(1, len(path) - 1)]
+  def _get_arcs(self, path):
+    return [(path[i], path[i + 1]) for i in range(0, len(path) - 1)]

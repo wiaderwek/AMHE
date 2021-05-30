@@ -15,7 +15,10 @@ class Graph:
     self._target = 'N33'
 
     self._vertices_for_generation = list(filter(lambda x: x not in [self._source, self._target], list(self._links.keys())))
-    self._vertices_for_generation.append(None)
+    for _ in range(int(len(self._vertices_for_generation) * EMPTY_VERTEX)):
+      self._vertices_for_generation.append(None)
+
+    random.shuffle(self._vertices_for_generation)
 
 
   def is_path_correct(self, path):
@@ -32,7 +35,7 @@ class Graph:
     pass
 
   def is_source_and_destination_correct(self, source: int, destination: int) -> bool:
-    return True
+    return source == self._source and destination == self._target
 
   def get_arc_bandwitdth(self, arc: Tuple[int, int]) -> float:
     return 0.2
@@ -89,6 +92,13 @@ class Graph:
 
     return population
 
+  def gen_first_population(self):
+    population = [
+      self.gen_population_member() for _ in range(SIZE_OF_FIRST_POPULATION)
+    ]
+
+    return population
+
   def gen_population_member(self):
     member = dict()
     # member[SHORTEST] = utils.gen_random_path(self.get_number_of_vertices())
@@ -102,10 +112,13 @@ class Graph:
     member = list()
     member.append(self._source)
     for i in range(size - 2):
-      member.append(random.choice(self._vertices_for_generation))
+      member.append(self.get_random_vertex())
     member.append(self._target)
 
     return member
+
+  def get_random_vertex(self):
+    return random.choice(self._vertices_for_generation)
 
   def get_path_as_bits(self, path):
     path_as_bits = list()
@@ -122,3 +135,15 @@ class Graph:
     if len(path_as_bits) % 8 != 0:
       raise BaseException("Error: len: {}, path: {}".format(len(path_as_bits), path_as_bits))
     return path_as_bits
+
+  def get_mutate_vertex(self, vertex):
+    if vertex is None:
+      return self.get_random_vertex()
+    neighbors = self._links[vertex]
+    neighbors = list(filter(lambda x: x not in [self._source, self._target], neighbors))
+    neighbors.append(None)
+
+    return random.choice(neighbors)
+
+
+
