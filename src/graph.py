@@ -20,6 +20,9 @@ class Graph:
   def is_flow_disrupted(self, path: List[int]) -> bool:
     pass
 
+  def is_source_and_destination_correct(self, source: int, destination: int) -> bool:
+    pass
+
   def get_arc_bandwitdth(self, arc: Tuple[int, int]) -> float:
     pass
 

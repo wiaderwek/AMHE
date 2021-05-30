@@ -1,6 +1,7 @@
 from typing import List, Tuple
 from math import exp, log
 from constants import (DISRUPTED_FLOW_PENALTY, INVALID_PATH_PENALTY,
+                       INVALID_SOURCE_AND_DESTINATION_PENALTY,
                        OVERLOADED_PATH_PENALTY)
 
 from graph import Graph
@@ -40,7 +41,8 @@ class CostFunc():
     return self._cost
 
   def _calc_cost(self) -> float:
-    self._set_cost(self._cost_func() + self._penalize_invalid_paths())
+    self._set_cost(self._cost_func() + self._penalize_invalid_paths() +
+                   self._penalize_invalid_source_and_destination())
     return self.get_cost()
 
   def _cost_func(self) -> float:
@@ -88,6 +90,15 @@ class CostFunc():
         self._path_x) else 0
     penalty += INVALID_PATH_PENALTY if self._graph.is_path_correct(
         self._path_y) else 0
+
+    return penalty
+
+  def _penalize_invalid_source_and_destination(self) -> float:
+    penalty = 0.
+    penalty += INVALID_SOURCE_AND_DESTINATION_PENALTY if self._graph.is_source_and_destination_correct(
+        self._path_x[0], self._path_x[-1]) else 0
+    penalty += INVALID_SOURCE_AND_DESTINATION_PENALTY if self._graph.is_source_and_destination_correct(
+        self._path_y[0], self._path_y[-1]) else 0
 
     return penalty
 
