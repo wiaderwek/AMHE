@@ -1,3 +1,6 @@
+from typing import List, Tuple
+
+
 class Graph:
 
   def __init__(self, links, demands):
@@ -10,6 +13,15 @@ class Graph:
         return False
 
     return True
+
+  def is_path_overloaded(self, path: List[int]) -> bool:
+    pass
+
+  def is_flow_disrupted(self, path: List[int]) -> bool:
+    pass
+
+  def get_arc_bandwitdth(self, arc: Tuple[int, int]) -> float:
+    pass
 
   def load_links_to_map(self, links):
     graph = dict()

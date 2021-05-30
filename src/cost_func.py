@@ -1,5 +1,7 @@
 from typing import List, Tuple
 from math import exp, log
+from constants import (DISRUPTED_FLOW_PENALTY, INVALID_PATH_PENALTY,
+                       OVERLOADED_PATH_PENALTY)
 
 from graph import Graph
 
@@ -24,7 +26,8 @@ class CostFunc():
     self._l_x = l_y
     self._graph = graph
     self._t = self._calc_common_arcs()
-    self._arcs = self._get_arcs()
+    self._arcs_x = self._get_arcs(self._path_x)
+    self._arcs_y = self._get_arcs(self._path_y)
 
     self._calc_cost()
 
@@ -37,7 +40,7 @@ class CostFunc():
     return self._cost
 
   def _calc_cost(self) -> float:
-    self._set_cost(self._cost_func() + self._penalize_flow_conservation() +
+    self._set_cost(self._cost_func() + self._penalize_flow_disruption() +
                    self._penalize_overloadepaths() +
                    self._penalize_invalipaths())
     return self.get_cost()
@@ -53,21 +56,42 @@ class CostFunc():
     return priority_objective - path_x_cost - path_y_cost
 
   def _get_used_bandwidth(self, arc: Tuple[int, int]) -> float:
-    pass
+    return self._graph.get_arc_bandwitdth(arc)
 
   def _calc_common_arcs(self) -> int:
-    pass
+    num_of_common_arcs = 0
 
-  def _penalize_flow_conservation(self) -> float:
-    pass
+    for arc in self._arcs_x:
+      num_of_common_arcs += 1 if arc in self._arcs_y else 0
+
+    return num_of_common_arcs
+
+  def _penalize_flow_disruption(self) -> float:
+    penalty = 0.
+    penalty += DISRUPTED_FLOW_PENALTY if self._graph.is_flow_disrupted(
+        self._path_x) else 0
+    penalty += DISRUPTED_FLOW_PENALTY if self._graph.is_flow_disrupted(
+        self._path_y) else 0
+
+    return penalty
 
   def _penalize_overloadepaths(self) -> float:
-    pass
+    penalty = 0.
+    penalty += OVERLOADED_PATH_PENALTY if self._graph.is_path_overloaded(
+        self._path_x) else 0
+    penalty += OVERLOADED_PATH_PENALTY if self._graph.is_path_overloaded(
+        self._path_y) else 0
+
+    return penalty
 
   def _penalize_invalipaths(self) -> float:
-    pass
+    penalty = 0.
+    penalty += INVALID_PATH_PENALTY if self._graph.is_path_correct(
+        self._path_x) else 0
+    penalty += INVALID_PATH_PENALTY if self._graph.is_path_correct(
+        self._path_y) else 0
 
-  def _get_arcs(self) -> List[Tuple[int, int]]:
-    return [(self._path_y[i], self._path_y[i + 1])
-            for i in range(1,
-                           len(self._path_y) - 1)]
+    return penalty
+
+  def _get_arcs(self, path: List[int]) -> List[Tuple[int, int]]:
+    return [(path[i], path[i + 1]) for i in range(1, len(path) - 1)]
