@@ -51,7 +51,7 @@ class CostFunc():
     path_x_cost = self._xi_x / (len(self._path_x) - 1)
     path_y_cost = exp(
         self._xi_y *
-        sum([log(1. - self._get_used_bandwidth(arc)) for arc in self._arcs]))
+        sum([log(1. - self._get_used_bandwidth(arc)) for arc in self._arcs_y]))
 
     return priority_objective - path_x_cost - path_y_cost
 
