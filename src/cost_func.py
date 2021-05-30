@@ -25,9 +25,9 @@ class CostFunc():
     self._l_x = l_x
     self._l_x = l_y
     self._graph = graph
-    self._t = self._calc_common_arcs()
     self._arcs_x = self._get_arcs(self._path_x)
     self._arcs_y = self._get_arcs(self._path_y)
+    self._t = self._calc_common_arcs()
 
     self._calc_cost()
 
@@ -40,15 +40,13 @@ class CostFunc():
     return self._cost
 
   def _calc_cost(self) -> float:
-    self._set_cost(self._cost_func() + self._penalize_flow_disruption() +
-                   self._penalize_overloadepaths() +
-                   self._penalize_invalipaths())
+    self._set_cost(self._cost_func() + self._penalize_invalid_paths())
     return self.get_cost()
 
   def _cost_func(self) -> float:
     priority_objective = self._t * (self._xi_x + self._xi_y)
     # Num of arcs is equal to num of vertices - 1
-    path_x_cost = self._xi_x / (len(self._path_x) - 1)
+    path_x_cost = self._xi_x / len(self._arcs_x)
     path_y_cost = exp(
         self._xi_y *
         sum([log(1. - self._get_used_bandwidth(arc)) for arc in self._arcs_y]))
@@ -84,7 +82,7 @@ class CostFunc():
 
     return penalty
 
-  def _penalize_invalipaths(self) -> float:
+  def _penalize_invalid_paths(self) -> float:
     penalty = 0.
     penalty += INVALID_PATH_PENALTY if self._graph.is_path_correct(
         self._path_x) else 0
