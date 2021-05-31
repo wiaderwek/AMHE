@@ -2,7 +2,7 @@ from typing import List, Tuple
 from math import exp, log
 from constants import (DISRUPTED_FLOW_PENALTY, INVALID_PATH_PENALTY,
                        INVALID_SOURCE_AND_DESTINATION_PENALTY,
-                       OVERLOADED_PATH_PENALTY)
+                       LOOP_IN_PATH_PENALTY, OVERLOADED_PATH_PENALTY)
 
 from graph import Graph
 
@@ -15,7 +15,7 @@ class CostFunc():
                path_x: List[int],
                path_y: List[int],
                graph: Graph,
-               xi_x: float = 1.,
+               xi_x: float = 2.,
                xi_y: float = 1.,
                l_x: float = 1.,
                l_y: float = 1.):
@@ -41,8 +41,7 @@ class CostFunc():
     return self._cost
 
   def _calc_cost(self) -> float:
-    self._set_cost(self._cost_func() + self._penalize_invalid_paths() +
-                   self._penalize_invalid_source_and_destination())
+    self._set_cost(self._cost_func() + self._penalize_invalid_paths())
     return self.get_cost()
 
   def _cost_func(self) -> float:
@@ -58,7 +57,6 @@ class CostFunc():
         sum([log(1. - self._get_used_bandwidth(arc)) for arc in self._arcs_y]))
 
     return priority_objective - path_x_cost - path_y_cost
-    #return -path_x_cost
 
   def _get_used_bandwidth(self, arc: Tuple[int, int]) -> float:
     return self._graph.get_arc_bandwitdth(arc)
@@ -91,19 +89,36 @@ class CostFunc():
 
   def _penalize_invalid_paths(self) -> float:
     penalty = 0.
-    penalty += 0 if self._graph.is_path_correct(
-        self._path_x) else INVALID_PATH_PENALTY
-    penalty += 0 if self._graph.is_path_correct(
-        self._path_y) else INVALID_PATH_PENALTY
+
+    num_of_correct_links_x = self._graph.num_of_correct_links(self._path_x)
+    num_of_correct_links_y = self._graph.num_of_correct_links(self._path_y)
+
+    # print('[Path x] arcs: {} correct_arcs: {}'.format(len(self._arcs_x), num_of_correct_links_x,))
+    # print(self._path_x)
+    # print('[Path y] arcs: {} correct_arcs: {}'.format(len(self._arcs_y), num_of_correct_links_y,))
+    # print(self._path_y)
+    # raise
+
+    penalty += INVALID_PATH_PENALTY * (
+        1 - num_of_correct_links_x / len(self._arcs_x))
+    penalty += INVALID_PATH_PENALTY * (
+        1 - num_of_correct_links_y / len(self._arcs_y))
+
+    penalty += LOOP_IN_PATH_PENALTY * (
+        1 - len(set(self._path_x)) / len(self._path_x))
+    penalty += LOOP_IN_PATH_PENALTY * (
+        1 - len(set(self._path_y)) / len(self._path_y))
 
     return penalty
 
   def _penalize_invalid_source_and_destination(self) -> float:
     penalty = 0.
     penalty += 0 if self._graph.is_source_and_destination_correct(
-        self._path_x[0], self._path_x[-1]) else INVALID_SOURCE_AND_DESTINATION_PENALTY
+        self._path_x[0],
+        self._path_x[-1]) else INVALID_SOURCE_AND_DESTINATION_PENALTY
     penalty += 0 if self._graph.is_source_and_destination_correct(
-        self._path_y[0], self._path_y[-1]) else INVALID_SOURCE_AND_DESTINATION_PENALTY
+        self._path_y[0],
+        self._path_y[-1]) else INVALID_SOURCE_AND_DESTINATION_PENALTY
 
     return penalty
 

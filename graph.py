@@ -28,6 +28,15 @@ class Graph:
 
     return True
 
+  def num_of_correct_links(self, path):
+    num_of_correct_links = 0
+
+    for i in range(len(path) - 1):
+      if path[i + 1] in self._links[path[i]]:
+        num_of_correct_links += 1
+
+    return num_of_correct_links
+
   def is_path_overloaded(self, path: List[int]) -> bool:
     pass
 
