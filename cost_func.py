@@ -1,10 +1,9 @@
-from typing import List, Tuple
+from typing import Tuple
 from math import exp, log
-from constants import (DISRUPTED_FLOW_PENALTY, INVALID_PATH_PENALTY,
-                       INVALID_SOURCE_AND_DESTINATION_PENALTY,
-                       LOOP_IN_PATH_PENALTY, OVERLOADED_PATH_PENALTY)
+from constants import (INVALID_PATH_PENALTY, LOOP_IN_PATH_PENALTY)
 
 from graph import Graph
+from path import Path
 
 
 class CostFunc():
@@ -12,10 +11,10 @@ class CostFunc():
   _cost: float = float('inf')
 
   def __init__(self,
-               path_x: List[int],
-               path_y: List[int],
+               path_x: Path,
+               path_y: Path,
                graph: Graph,
-               xi_x: float = 2.,
+               xi_x: float = 1.,
                xi_y: float = 1.,
                l_x: float = 1.,
                l_y: float = 1.):
@@ -26,14 +25,15 @@ class CostFunc():
     self._l_x = l_x
     self._l_x = l_y
     self._graph = graph
-    self._arcs_x = self._get_arcs(self._path_x)
-    self._arcs_y = self._get_arcs(self._path_y)
-    self._t = self._calc_common_arcs()
+    self._t = path_x.get_num_of_common_arcs(path_y.get_arcs())
 
     self._calc_cost()
 
   def get_cost(self):
     return self._cost
+
+  def get_common_arcs(self):
+    return self._t
 
   def _set_cost(self, cost: float):
     self._cost = cost
@@ -46,46 +46,21 @@ class CostFunc():
 
   def _cost_func(self) -> float:
 
-    if len(self._arcs_x) == 0 or len(self._arcs_y) == 0:
+    if len(self._path_x.get_arcs()) == 0 or len(self._path_y.get_arcs()) == 0:
       return self.get_cost()
 
     priority_objective = self._t * (self._xi_x + self._xi_y)
-    # Num of arcs is equal to num of vertices - 1
-
-    path_x_cost = self._xi_x / len(self._arcs_x)
+    path_x_cost = self._xi_x / len(self._path_x.get_arcs())
     path_y_cost = self._xi_y * exp(
-        sum([log(1. - self._get_used_bandwidth(arc)) for arc in self._arcs_y]))
+        sum([
+            log(1. - self._get_used_bandwidth(arc))
+            for arc in self._path_y.get_arcs()
+        ]))
 
     return priority_objective - path_x_cost - path_y_cost
 
-  def _get_used_bandwidth(self, arc: Tuple[int, int]) -> float:
+  def _get_used_bandwidth(self, arc: Tuple[str, str]) -> float:
     return self._graph.get_arc_bandwitdth(arc)
-
-  def _calc_common_arcs(self) -> int:
-    num_of_common_arcs = 0
-
-    for arc in self._arcs_x:
-      num_of_common_arcs += 1 if arc in self._arcs_y else 0
-
-    return num_of_common_arcs
-
-  def _penalize_flow_disruption(self) -> float:
-    penalty = 0.
-    penalty += DISRUPTED_FLOW_PENALTY if self._graph.is_flow_disrupted(
-        self._path_x) else 0
-    penalty += DISRUPTED_FLOW_PENALTY if self._graph.is_flow_disrupted(
-        self._path_y) else 0
-
-    return penalty
-
-  def _penalize_overloadepaths(self) -> float:
-    penalty = 0.
-    penalty += OVERLOADED_PATH_PENALTY if self._graph.is_path_overloaded(
-        self._path_x) else 0
-    penalty += OVERLOADED_PATH_PENALTY if self._graph.is_path_overloaded(
-        self._path_y) else 0
-
-    return penalty
 
   def _penalize_invalid_paths(self) -> float:
     penalty = 0.
@@ -93,34 +68,49 @@ class CostFunc():
     num_of_correct_links_x = self._graph.num_of_correct_links(self._path_x)
     num_of_correct_links_y = self._graph.num_of_correct_links(self._path_y)
 
-    # print('[Path x] arcs: {} correct_arcs: {}'.format(len(self._arcs_x), num_of_correct_links_x,))
+    # print('[Path x] arcs: {} correct_arcs: {}'.format(len(self._path_x.get_arcs()), num_of_correct_links_x,))
     # print(self._path_x)
-    # print('[Path y] arcs: {} correct_arcs: {}'.format(len(self._arcs_y), num_of_correct_links_y,))
+    # print('[Path y] arcs: {} correct_arcs: {}'.format(len(self._path_y.get_arcs()), num_of_correct_links_y,))
     # print(self._path_y)
     # raise
 
     penalty += INVALID_PATH_PENALTY * (
-        1 - num_of_correct_links_x / len(self._arcs_x))
+        1 - num_of_correct_links_x / len(self._path_x.get_arcs()))
     penalty += INVALID_PATH_PENALTY * (
-        1 - num_of_correct_links_y / len(self._arcs_y))
+        1 - num_of_correct_links_y / len(self._path_y.get_arcs()))
 
     penalty += LOOP_IN_PATH_PENALTY * (
-        1 - len(set(self._path_x)) / len(self._path_x))
+        1 - len(set(self._path_x.get_real_path())) / len(self._path_x.get_real_path()))
     penalty += LOOP_IN_PATH_PENALTY * (
-        1 - len(set(self._path_y)) / len(self._path_y))
+        1 - len(set(self._path_y.get_real_path())) / len(self._path_y.get_real_path()))
 
     return penalty
 
-  def _penalize_invalid_source_and_destination(self) -> float:
-    penalty = 0.
-    penalty += 0 if self._graph.is_source_and_destination_correct(
-        self._path_x[0],
-        self._path_x[-1]) else INVALID_SOURCE_AND_DESTINATION_PENALTY
-    penalty += 0 if self._graph.is_source_and_destination_correct(
-        self._path_y[0],
-        self._path_y[-1]) else INVALID_SOURCE_AND_DESTINATION_PENALTY
+  # def _penalize_flow_disruption(self) -> float:
+  #   penalty = 0.
+  #   penalty += DISRUPTED_FLOW_PENALTY if self._graph.is_flow_disrupted(
+  #       self._path_x) else 0
+  #   penalty += DISRUPTED_FLOW_PENALTY if self._graph.is_flow_disrupted(
+  #       self._path_y) else 0
 
-    return penalty
+  #   return penalty
 
-  def _get_arcs(self, path):
-    return [(path[i], path[i + 1]) for i in range(0, len(path) - 1)]
+  # def _penalize_overloadepaths(self) -> float:
+  #   penalty = 0.
+  #   penalty += OVERLOADED_PATH_PENALTY if self._graph.is_path_overloaded(
+  #       self._path_x) else 0
+  #   penalty += OVERLOADED_PATH_PENALTY if self._graph.is_path_overloaded(
+  #       self._path_y) else 0
+
+  #   return penalty
+
+  # def _penalize_invalid_source_and_destination(self) -> float:
+  #   penalty = 0.
+  #   penalty += 0 if self._graph.is_source_and_destination_correct(
+  #       self._path_x[0],
+  #       self._path_x[-1]) else INVALID_SOURCE_AND_DESTINATION_PENALTY
+  #   penalty += 0 if self._graph.is_source_and_destination_correct(
+  #       self._path_y[0],
+  #       self._path_y[-1]) else INVALID_SOURCE_AND_DESTINATION_PENALTY
+
+  #   return penalty
