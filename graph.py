@@ -1,4 +1,5 @@
-from constants import BEST, BITS_FOR_VERTEX, EMPTY_VERTEX, SHORTEST, SIZE_OF_FIRST_POPULATION, SIZE_OF_POPULATION
+from constants import BEST, BITS_FOR_VERTEX, EMPTY_VERTEX, SHORTEST, SIZE_OF_FIRST_POPULATION, SIZE_OF_POPULATION,\
+  NONE_PROB, MAX_PATH_LENGTH
 from typing import Dict, List, Tuple
 
 from path import Path
@@ -140,8 +141,8 @@ class Graph:
     # member[SHORTEST] = utils.gen_random_path(self.get_number_of_vertices())
     # member[BEST] = utils.gen_random_path(self.get_number_of_vertices())
     member[SHORTEST] = Path(
-        self.gen_random_member(self.get_number_of_vertices()))
-    member[BEST] = Path(self.gen_random_member(self.get_number_of_vertices()))
+        self.gen_random_member(MAX_PATH_LENGTH))
+    member[BEST] = Path(self.gen_random_member(MAX_PATH_LENGTH))
     return member
 
   def gen_random_member(self, size):
@@ -179,6 +180,6 @@ class Graph:
     neighbors = self._links[vertex]
     neighbors = list(
         filter(lambda x: x not in [self._source, self._target], neighbors))
-    neighbors.append(None)
+    [neighbors.append(None) for _ in range(int(NONE_PROB * len(neighbors)))]
 
     return random.choice(neighbors)

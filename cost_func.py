@@ -14,7 +14,7 @@ class CostFunc():
                path_x: Path,
                path_y: Path,
                graph: Graph,
-               xi_x: float = 1.,
+               xi_x: float = 3.,
                xi_y: float = 1.,
                l_x: float = 1.,
                l_y: float = 1.):

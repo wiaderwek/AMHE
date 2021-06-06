@@ -6,7 +6,7 @@ from constants import (BEST, MAX_ITER, MUTATE_GEN_PROBABILITY,
                        MUTATE_MEMBER_PROBABILITY,
                        MUTATE_MISSMATCHED_GEN_PROBABILITY_WEIGHT,
                        REPRODUCTION_POINT_DIVIDER, REPRODUCTION_PROBABILITY,
-                       SHORTEST, SIZE_OF_POPULATION)
+                       SHORTEST, SIZE_OF_POPULATION, NONE_PROB)
 from graph import Graph
 from path import Path
 
@@ -23,8 +23,9 @@ class Evolution():
 
     for iter in range(MAX_ITER):
 
-      self._append_new_population(
-          self._add_cost(self._mutate(self._reproduce_population())))
+      # self._append_new_population(
+      #     self._add_cost(self._mutate(self._reproduce_population())))
+      self._population = self._add_cost(self._mutate(self._reproduce_population()))
       self._sort_and_crop_population()
       self._log(iter)
 
@@ -44,9 +45,10 @@ class Evolution():
     population_with_cost = self._add_cost(first_population)
 
     # print("Population: {}".format(population_with_cost))
-    population_with_cost = sorted(population_with_cost, key=lambda x: x[1])
+    #population_with_cost = sorted(population_with_cost, key=lambda x: x[1])
 
-    self._population = population_with_cost[:SIZE_OF_POPULATION]
+    #self._population = population_with_cost[:SIZE_OF_POPULATION]
+    self._population = population_with_cost
 
   def _append_new_population(self, new_population: List[Tuple[Dict[str, Path],
                                                               float]]):
@@ -62,10 +64,16 @@ class Evolution():
 
     # TODO: nie powinno tu być stepu co 2?
     for i in range(len(self._population) - 1):
-      rep_mem1, rep_mem2 = self._reproduce_members(self._population[i][0],
+      rep_mem1, rep_mem2, rep_mem3, rep_mem4, rep_mem5, rep_mem6, rep_mem7, rep_mem8 = self._reproduce_members(self._population[i][0],
                                                    self._population[i + 1][0])
       reproduced_population.append(rep_mem1)
       reproduced_population.append(rep_mem2)
+      reproduced_population.append(rep_mem3)
+      reproduced_population.append(rep_mem4)
+      reproduced_population.append(rep_mem5)
+      reproduced_population.append(rep_mem6)
+      reproduced_population.append(rep_mem7)
+      reproduced_population.append(rep_mem8)
 
     return reproduced_population
 
@@ -82,6 +90,24 @@ class Evolution():
     }, {
         SHORTEST: Path(second_shortest),
         BEST: Path(second_best)
+    }, {
+        SHORTEST: Path(first_shortes),
+        BEST: Path(second_best)
+    }, {
+        SHORTEST: Path(second_shortest),
+        BEST: Path(first_best)
+    }, {
+        SHORTEST: Path(first_best),
+        BEST: Path(first_shortes)
+    }, {
+        SHORTEST: Path(second_best),
+        BEST: Path(second_shortest)
+    }, {
+        SHORTEST: Path(second_best),
+        BEST: Path(first_shortes)
+    }, {
+        SHORTEST: Path(first_best),
+        BEST: Path(second_shortest)
     }
 
   def _reproduce_path(self, first_path: List[str], second_path: List[str]):
@@ -150,8 +176,9 @@ class Evolution():
 
   def _log(self, iter):
     if iter % 100 == 0:
+      cost = CostFunc(self._population[0][0][SHORTEST], self._population[0][0][BEST], self._graph)
       print(
-          "[Iteration: {}] Best member's function cost: {} ([correct / all ] x: {} / {}, y: {} / {}); Common: {}"
+          "[Iteration: {}] Best member's function cost: {} ([correct / all ] x: {} / {}, y: {} / {}); Common: {}, cost: {} + {} = {}"
           .format(
               iter, self._population[0][1],
               self._population[0][0][SHORTEST].get_num_of_correct_links(),
@@ -162,7 +189,7 @@ class Evolution():
               len(self._graph.get_path(
                   self._population[0][0][BEST].get_arcs())),
               self._population[0][0][SHORTEST].get_num_of_common_arcs(
-                  self._population[0][0][BEST].get_arcs())))
+                  self._population[0][0][BEST].get_arcs()), cost._penalize_invalid_paths(), cost._cost_func(), cost.get_cost()))
       print("    [SHORTEST]:{}".format(
           self._population[0][0][SHORTEST].get_path()))
       print("    [SHORTEST]:{}".format(
