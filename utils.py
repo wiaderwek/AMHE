@@ -1,5 +1,6 @@
 import random
 import xml.etree.ElementTree as ET
+import os
 
 from graph import Graph
 from constants import BITS_FOR_VERTEX
@@ -41,6 +42,17 @@ def gen_random_path(size):
     path.append(random.randint(0, 1))
 
   return path
+
+def get_test_file_pairs(data_path):
+  test_data = dict()
+  for xml in os.listdir(data_path):
+    if xml.endswith(".xml"):
+      test_data[os.path.join(data_path, xml)] = list()
+      for txt in os.listdir(data_path):
+        if txt.endswith(".txt") and txt.startswith(os.path.splitext(xml)[0]):
+          test_data[os.path.join(data_path, xml)].append(os.path.join(data_path, txt))
+
+  return test_data
 
 
 # population = gen_population(g)

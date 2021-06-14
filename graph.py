@@ -13,8 +13,8 @@ class Graph:
   def __init__(self, links, demands):
     self._links = self.load_links_to_map(links)
     self._demands = demands
-    self._source = 'N55'
-    self._target = 'N14'
+    self._source = self._demands['source']
+    self._target = self._demands['target']
 
     self._vertices_for_generation = list(
         filter(lambda x: x not in [self._source, self._target],
@@ -75,7 +75,13 @@ class Graph:
     return source == self._source and destination == self._target
 
   def get_arc_bandwitdth(self, arc: Tuple[str, str]) -> float:
-    return 0.2
+    return self._demands['current_load']
+
+  def get_l_x(self) -> float:
+    return self._demands['Lx']
+
+  def get_l_y(self) -> float:
+    return self._demands['Ly']
 
   def load_links_to_map(self, links):
     graph = dict()
@@ -90,6 +96,9 @@ class Graph:
 
     # print(graph)
     return graph
+
+  def load_demands(self, demands):
+    print(demands)
 
   def get_number_of_vertices(self):
     return len(self._links)

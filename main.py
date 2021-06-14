@@ -1,9 +1,17 @@
-from utils import load_data
+from utils import load_data, get_test_file_pairs
 from evolution import Evolution
 
 
 def main():
-  g = load_data("../gen_150_d_2.xml", "gen_50_d_2_0_4_1.txt")
+  test_files = get_test_file_pairs("../")
+  # for links, demands_list in test_files.items():
+  #   for demands in demands_list:
+  #     g = load_data(links, demands)
+  #     evol_alg = Evolution(g)
+  #
+  #     evol_alg.run()
+
+  g = load_data("../gen_150_d_2.xml", "../gen_150_d_2_0_4_1.txt")
   evol_alg = Evolution(g)
 
   evol_alg.run()

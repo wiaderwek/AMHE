@@ -15,15 +15,13 @@ class CostFunc():
                path_y: Path,
                graph: Graph,
                xi_x: float = 3.,
-               xi_y: float = 1.,
-               l_x: float = 1.,
-               l_y: float = 1.):
+               xi_y: float = 1.,):
     self._path_x = path_x
     self._path_y = path_y
     self._xi_x = xi_x
     self._xi_y = xi_y
-    self._l_x = l_x
-    self._l_x = l_y
+    self._l_x = graph.get_l_x()
+    self._l_x = graph.get_l_y()
     self._graph = graph
     self._t = path_x.get_num_of_common_arcs(path_y.get_arcs())
 
@@ -53,7 +51,7 @@ class CostFunc():
     path_x_cost = self._xi_x / len(self._path_x.get_arcs())
     path_y_cost = self._xi_y * exp(
         sum([
-            log(1. - self._get_used_bandwidth(arc))
+            log(1. - float(self._get_used_bandwidth(arc)))
             for arc in self._path_y.get_arcs()
         ]))
 
