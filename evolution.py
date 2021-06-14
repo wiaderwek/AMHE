@@ -13,18 +13,18 @@ from path import Path
 
 class Evolution():
   _population: List[Tuple[Dict[str, Path], float]]
+  _best: Tuple[Dict[str, Path], float]
 
   def __init__(self, graph: Graph) -> None:
     self._graph = graph
 
   # ---------------------------------- main loop ---------------------------------
   def run(self):
+    self._best = None
     self._create_first_population()
 
     for iter in range(MAX_ITER):
 
-      # self._append_new_population(
-      #     self._add_cost(self._mutate(self._reproduce_population())))
       self._population = self._add_cost(self._mutate(self._reproduce_population()))
       self._sort_and_crop_population()
       self._log(iter)
@@ -32,9 +32,6 @@ class Evolution():
   # ---------------------------------- /main loop ---------------------------------
 
   def _add_cost(self, population: List[Dict[str, Path]]):
-    # print('\n')
-    # print(population[1][SHORTEST])
-    # raise
     return [(population[i],
              CostFunc(population[i][SHORTEST], population[i][BEST],
                       self._graph).get_cost()) for i in range(len(population))]
@@ -62,7 +59,6 @@ class Evolution():
   def _reproduce_population(self) -> List[Dict[str, Path]]:
     reproduced_population: List[Dict[str, Path]] = []
 
-    # TODO: nie powinno tu być stepu co 2?
     for i in range(len(self._population) - 1):
       rep_mem1, rep_mem2, rep_mem3, rep_mem4, rep_mem5, rep_mem6, rep_mem7, rep_mem8 = self._reproduce_members(self._population[i][0],
                                                    self._population[i + 1][0])
@@ -178,7 +174,7 @@ class Evolution():
     if iter % 100 == 0:
       cost = CostFunc(self._population[0][0][SHORTEST], self._population[0][0][BEST], self._graph)
       print(
-          "[Iteration: {}] Best member's function cost: {} ([correct / all ] x: {} / {}, y: {} / {}); Common: {}, cost: {} + {} = {}"
+          "[Iteration: {}] Best member's function cost: {} ([correct / all ] x: {} / {}, y: {} / {}); Common: {}"
           .format(
               iter, self._population[0][1],
               self._population[0][0][SHORTEST].get_num_of_correct_links(),
@@ -189,7 +185,7 @@ class Evolution():
               len(self._graph.get_path(
                   self._population[0][0][BEST].get_arcs())),
               self._population[0][0][SHORTEST].get_num_of_common_arcs(
-                  self._population[0][0][BEST].get_arcs()), cost._penalize_invalid_paths(), cost._cost_func(), cost.get_cost()))
+                  self._population[0][0][BEST].get_arcs())))
       print("    [SHORTEST]:{}".format(
           self._population[0][0][SHORTEST].get_path()))
       print("    [SHORTEST]:{}".format(

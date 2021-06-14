@@ -13,8 +13,8 @@ class Graph:
   def __init__(self, links, demands):
     self._links = self.load_links_to_map(links)
     self._demands = demands
-    self._source = 'N43'
-    self._target = 'N33'
+    self._source = 'N55'
+    self._target = 'N14'
 
     self._vertices_for_generation = list(
         filter(lambda x: x not in [self._source, self._target],
@@ -180,6 +180,7 @@ class Graph:
     neighbors = self._links[vertex]
     neighbors = list(
         filter(lambda x: x not in [self._source, self._target], neighbors))
+    neighbors.append(None)
     [neighbors.append(None) for _ in range(int(NONE_PROB * len(neighbors)))]
 
     return random.choice(neighbors)

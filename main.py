@@ -3,7 +3,7 @@ from evolution import Evolution
 
 
 def main():
-  g = load_data("gen_50_d_2.xml", "gen_50_d_2_0_4_1.txt")
+  g = load_data("../gen_150_d_2.xml", "gen_50_d_2_0_4_1.txt")
   evol_alg = Evolution(g)
 
   evol_alg.run()
