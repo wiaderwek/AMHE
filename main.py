@@ -20,6 +20,12 @@ flags.DEFINE_string(
     default=None,
     help='Path to the graph for which algorithm will be executed. ' +
     'If skiped prediction will be made for all graphs in data dir')
+flags.DEFINE_integer('start_index',
+                     default=None,
+                     help='Minimal index of test data for graph.')
+flags.DEFINE_integer('stop_index',
+                     default=None,
+                     help='Maximal index of test data for graph.')
 
 
 def check_flags():
@@ -42,6 +48,15 @@ def main(_):
       continue
 
     for test_case in test_files[graph]:
+      test_case_idx = test_case.split('.')[0].split('_')[-1]
+
+      if test_case_idx == 'config':
+        continue
+      elif (
+          FLAGS.start_index is not None and int(test_case_idx) < FLAGS.start_index or
+          FLAGS.stop_index is not None and int(test_case_idx) > FLAGS.stop_index):  # noqa: E125
+        continue
+
       g = load_data(graph, test_case)
       for demand in g.get_demands():
         timestamp = str(datetime.datetime.now())
