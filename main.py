@@ -15,6 +15,11 @@ flags.DEFINE_string(
     'output_dir',
     default='./results',
     help='Path to output file where clastering results will be stored.')
+flags.DEFINE_string(
+    'graph_path',
+    default=None,
+    help='Path to the graph for which algorithm will be executed. ' +
+    'If skiped prediction will be made for all graphs in data dir')
 
 
 def check_flags():
@@ -33,6 +38,9 @@ def main(_):
   test_files = get_test_file_pairs(FLAGS.data_dir)
 
   for graph in test_files:
+    if FLAGS.graph_path is not None and graph != FLAGS.graph_path:
+      continue
+
     for test_case in test_files[graph]:
       g = load_data(graph, test_case)
       for demand in g.get_demands():
