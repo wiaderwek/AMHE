@@ -1,4 +1,5 @@
 import random
+from typing import Dict, List
 import xml.etree.ElementTree as ET
 import os
 
@@ -25,17 +26,6 @@ def load_txt(demands_path):
     return dict((v.split(',')) for v in content)
 
 
-# g = load_data(
-#     "D:\\Tomek\\PW-informatyka\\Magisterka\\SEM2\\AMHE\\projekt\\przykladowe_dane\\gen_50_d_2.xml",
-#     "D:\\Tomek\\PW-informatyka\\Magisterka\\SEM2\\AMHE\\projekt\\przykladowe_dane\\gen_50_d_2_0_4_1.txt"
-# )
-#
-# print(g.is_path_correct(['N1', 'N2', 'N3']))
-# print(g.is_path_correct(['N1', 'N39', 'N2']))
-
-# def find_paths(ver1, ver2):
-
-
 def gen_random_path(size):
   path = []
   for i in range(BITS_FOR_VERTEX * size):
@@ -43,29 +33,19 @@ def gen_random_path(size):
 
   return path
 
+
 def get_test_file_pairs(data_path):
-  test_data = dict()
+  test_data: Dict[str, List[str]] = dict()
   for xml in os.listdir(data_path):
     if xml.endswith(".xml"):
       test_data[os.path.join(data_path, xml)] = list()
       for txt in os.listdir(data_path):
         if txt.endswith(".txt") and txt.startswith(os.path.splitext(xml)[0]):
-          test_data[os.path.join(data_path, xml)].append(os.path.join(data_path, txt))
+          test_data[os.path.join(data_path,
+                                 xml)].append(os.path.join(data_path, txt))
 
   return test_data
 
 
-# population = gen_population(g)
-# print("Number of vertices: {}".format(g.get_number_of_vertices()))
-# print(get_member_as_vertices(population[0], g))
-#
-# # for member in population:
-# #     vertices = get_member_as_vertices(member, g)
-# #
-# #     if not all(x is None for x in vertices[SHORTEST]) or not all(x is None for x in vertices[BEST]):
-# #         print(vertices)
-#
-# reproduced_members = reproduce_members(population[0], population[1])
-# print("Reproduced members: {}".format(reproduced_members))
-# mutated_members = mutate(reproduced_members)
-# print("Mutated members: {}".format(mutated_members))
+def is_dir_correct(path: str):
+  return os.path.isdir(path)
