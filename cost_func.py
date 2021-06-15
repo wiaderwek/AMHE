@@ -66,12 +66,6 @@ class CostFunc():
     num_of_correct_links_x = self._graph.num_of_correct_links(self._path_x)
     num_of_correct_links_y = self._graph.num_of_correct_links(self._path_y)
 
-    # print('[Path x] arcs: {} correct_arcs: {}'.format(len(self._path_x.get_arcs()), num_of_correct_links_x,))
-    # print(self._path_x)
-    # print('[Path y] arcs: {} correct_arcs: {}'.format(len(self._path_y.get_arcs()), num_of_correct_links_y,))
-    # print(self._path_y)
-    # raise
-
     penalty += INVALID_PATH_PENALTY * (
         1 - num_of_correct_links_x / len(self._path_x.get_arcs()))
     penalty += INVALID_PATH_PENALTY * (
@@ -83,32 +77,3 @@ class CostFunc():
         1 - len(set(self._path_y.get_real_path())) / len(self._path_y.get_real_path()))
 
     return penalty
-
-  # def _penalize_flow_disruption(self) -> float:
-  #   penalty = 0.
-  #   penalty += DISRUPTED_FLOW_PENALTY if self._graph.is_flow_disrupted(
-  #       self._path_x) else 0
-  #   penalty += DISRUPTED_FLOW_PENALTY if self._graph.is_flow_disrupted(
-  #       self._path_y) else 0
-
-  #   return penalty
-
-  # def _penalize_overloadepaths(self) -> float:
-  #   penalty = 0.
-  #   penalty += OVERLOADED_PATH_PENALTY if self._graph.is_path_overloaded(
-  #       self._path_x) else 0
-  #   penalty += OVERLOADED_PATH_PENALTY if self._graph.is_path_overloaded(
-  #       self._path_y) else 0
-
-  #   return penalty
-
-  # def _penalize_invalid_source_and_destination(self) -> float:
-  #   penalty = 0.
-  #   penalty += 0 if self._graph.is_source_and_destination_correct(
-  #       self._path_x[0],
-  #       self._path_x[-1]) else INVALID_SOURCE_AND_DESTINATION_PENALTY
-  #   penalty += 0 if self._graph.is_source_and_destination_correct(
-  #       self._path_y[0],
-  #       self._path_y[-1]) else INVALID_SOURCE_AND_DESTINATION_PENALTY
-
-  #   return penalty

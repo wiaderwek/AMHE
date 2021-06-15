@@ -1,68 +1,78 @@
-from utils import load_data, get_test_file_pairs
+from constants import BEST, SHORTEST
+from absl import app, flags
+import datetime
+
+from save_result import save_result
+from utils import is_dir_correct, load_data, get_test_file_pairs
 from evolution import Evolution
 
+FLAGS = flags.FLAGS
 
-def main():
-  test_files = get_test_file_pairs("../")
-  # for links, demands_list in test_files.items():
-  #   for demands in demands_list:
-  #     g = load_data(links, demands)
-  #     evol_alg = Evolution(g)
-  #
-  #     evol_alg.run()
-
-  g = load_data("../gen_150_d_2.xml", "../gen_150_d_2_0_4_1.txt")
-  evol_alg = Evolution(g)
-
-  evol_alg.run()
-  # first_population = g.gen_first_population()
-
-  # # print(population)
-
-  # population_with_cost = [
-  #     (first_population[i],
-  #      CostFunc(g.get_path(first_population[i][SHORTEST]),
-  #               g.get_path(first_population[i][BEST]), g).get_cost())
-  #     for i in range(len(first_population))
-  # ]
-  # # print("Population: {}".format(population_with_cost))
-  # population_with_cost = sorted(population_with_cost, key=lambda x: x[1])
-  # population = Evolution(population_with_cost[:SIZE_OF_POPULATION])
-
-  # it = 0
-  # for i in range(100000):
-  #   reproduced_population = population.reproduce_population()
-
-  #   population.mutate(reproduced_population)
-
-  #   rep_population_with_cost = [
-  #       (reproduced_population[i],
-  #        CostFunc(g.get_path(reproduced_population[i][SHORTEST]),
-  #                 g.get_path(reproduced_population[i][BEST]), g).get_cost())
-  #       for i in range(len(reproduced_population) - 1)
-  #   ]
-
-  #   for pop_mem in rep_population_with_cost:
-  #     population_with_cost.append(pop_mem)
-
-  #   # [print(population_with_cost[i][1]) for i in range(len(population_with_cost) - 1)]
-  #   population_with_cost = sorted(population_with_cost, key=lambda x: x[1])
-  #   population_with_cost = population_with_cost[:SIZE_OF_POPULATION]
-  #   if i % 100 == 0:
-  #     print(
-  #         "[Iteration: {}] Best member's function cost: {} ([correct / all] x: {} / {}, y: {} / {})"
-  #         .format(
-  #             it, population_with_cost[0][1],
-  #             g.num_of_correct_links(
-  #                 g.get_path(population_with_cost[0][0][SHORTEST])),
-  #             len(g.get_path(population_with_cost[0][0][SHORTEST])) - 1,
-  #             g.num_of_correct_links(
-  #                 g.get_path(population_with_cost[0][0][BEST])),
-  #             len(g.get_path(population_with_cost[0][0][BEST])) - 1))
-  #     print(population_with_cost[0][0])
-
-  #   it += 1
+flags.DEFINE_string('data_dir',
+                    default='data',
+                    help='Path to input file containing dataset.')
+flags.DEFINE_string(
+    'output_dir',
+    default='results',
+    help='Path to output file where clastering results will be stored.')
+flags.DEFINE_string(
+    'graph_path',
+    default=None,
+    help='Path to the graph for which algorithm will be executed. ' +
+    'If skiped prediction will be made for all graphs in data dir')
+flags.DEFINE_integer('start_index',
+                     default=None,
+                     help='Minimal index of test data for graph.')
+flags.DEFINE_integer('stop_index',
+                     default=None,
+                     help='Maximal index of test data for graph.')
 
 
-if __name__ == "__main__":
-  main()
+def check_flags():
+  if not is_dir_correct(FLAGS.data_dir):
+    raise AttributeError(
+        'Provided data_dir `{}` is not a valid directory'.format(
+            FLAGS.data_dir))
+  if not is_dir_correct(FLAGS.output_dir):
+    raise AttributeError(
+        'Provided output_dir `{}` is not a valid directory'.format(
+            FLAGS.output_dir))
+
+
+def main(_):
+  check_flags()
+  test_files = get_test_file_pairs(FLAGS.data_dir)
+
+  for graph in test_files:
+    if FLAGS.graph_path is not None and graph != FLAGS.graph_path:
+      continue
+
+    for test_case in test_files[graph]:
+      test_case_idx = test_case.split('.')[0].split('_')[-1]
+
+      if test_case_idx == 'config':
+        continue
+      elif (FLAGS.start_index is not None and
+            int(test_case_idx) < FLAGS.start_index or
+            FLAGS.stop_index is not None and
+            int(test_case_idx) > FLAGS.stop_index):  # noqa: E125
+        continue
+
+      g = load_data(graph, test_case)
+      timestamp = str(datetime.datetime.now())
+      evol_alg = Evolution(g)
+
+      (exec_time, best, best_iterations, iter, is_shortest_path_correct,
+       is_best_path_correct) = evol_alg.run()
+
+      result_file_name = graph.split('/')[-1].split('.')[0] + '_result'
+      source = g.get_source()
+      target = g.get_target()
+      save_result(FLAGS.output_dir, result_file_name, timestamp, source, target,
+                  exec_time, iter, best_iterations, best[1],
+                  is_shortest_path_correct, is_best_path_correct,
+                  best[0][SHORTEST], best[0][BEST])
+
+
+if __name__ == '__main__':
+  app.run(main)

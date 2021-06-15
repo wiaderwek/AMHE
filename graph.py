@@ -1,20 +1,21 @@
-from constants import BEST, BITS_FOR_VERTEX, EMPTY_VERTEX, SHORTEST, SIZE_OF_FIRST_POPULATION, SIZE_OF_POPULATION,\
-  NONE_PROB, MAX_PATH_LENGTH
-from typing import Dict, List, Tuple
-
 from path import Path
 from operator import is_not
 from functools import partial
 import random
+from typing import Dict, List, Tuple
+
+from constants import (BEST, BITS_FOR_VERTEX, EMPTY_VERTEX, SHORTEST,
+                       SIZE_OF_FIRST_POPULATION, SIZE_OF_POPULATION, NONE_PROB,
+                       MAX_PATH_LENGTH)
 
 
 class Graph:
 
-  def __init__(self, links, demands):
+  def __init__(self, links, file_content: Dict[str, str]):
     self._links = self.load_links_to_map(links)
-    self._demands = demands
-    self._source = self._demands['source']
-    self._target = self._demands['target']
+    self._metadata, _ = self.parse_file_content(file_content)
+    self._source = self._metadata['source']
+    self._target = self._metadata['target']
 
     self._vertices_for_generation = list(
         filter(lambda x: x not in [self._source, self._target],
@@ -23,6 +24,23 @@ class Graph:
       self._vertices_for_generation.append(None)
 
     random.shuffle(self._vertices_for_generation)
+
+  def get_source(self):
+    return self._source
+
+  def get_target(self):
+    return self._target
+
+  def parse_file_content(self, file_content: Dict[str, str]):
+    demands: List[str] = []
+    metadata: Dict[str, str] = {}
+    for key in file_content:
+      if key not in ['Lx', 'Ly'] and key.startswith('L'):
+        demands.append(key)
+      else:
+        metadata[key] = file_content[key]
+
+    return metadata, demands
 
   def is_path_correct(self, path: Path):
     for i in range(len(path.get_path()) - 1):
@@ -75,13 +93,16 @@ class Graph:
     return source == self._source and destination == self._target
 
   def get_arc_bandwitdth(self, arc: Tuple[str, str]) -> float:
-    return self._demands['current_load']
+    return self._metadata['current_load']
 
   def get_l_x(self) -> float:
-    return self._demands['Lx']
+    return self._metadata['Lx']
 
   def get_l_y(self) -> float:
-    return self._demands['Ly']
+    return self._metadata['Ly']
+
+  # def get_demands(self) -> List[str]:
+  #   return self._demands
 
   def load_links_to_map(self, links):
     graph = dict()
@@ -149,8 +170,7 @@ class Graph:
     member: Dict[str, Path] = dict()
     # member[SHORTEST] = utils.gen_random_path(self.get_number_of_vertices())
     # member[BEST] = utils.gen_random_path(self.get_number_of_vertices())
-    member[SHORTEST] = Path(
-        self.gen_random_member(MAX_PATH_LENGTH))
+    member[SHORTEST] = Path(self.gen_random_member(MAX_PATH_LENGTH))
     member[BEST] = Path(self.gen_random_member(MAX_PATH_LENGTH))
     return member
 
