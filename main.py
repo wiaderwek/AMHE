@@ -52,23 +52,26 @@ def main(_):
 
       if test_case_idx == 'config':
         continue
-      elif (
-          FLAGS.start_index is not None and int(test_case_idx) < FLAGS.start_index or
-          FLAGS.stop_index is not None and int(test_case_idx) > FLAGS.stop_index):  # noqa: E125
+      elif (FLAGS.start_index is not None and
+            int(test_case_idx) < FLAGS.start_index or
+            FLAGS.stop_index is not None and
+            int(test_case_idx) > FLAGS.stop_index):  # noqa: E125
         continue
 
       g = load_data(graph, test_case)
-      for demand in g.get_demands():
-        timestamp = str(datetime.datetime.now())
+      timestamp = str(datetime.datetime.now())
+      evol_alg = Evolution(g)
 
-        evol_alg = Evolution(g)
-        exec_time, best, best_iterations, iter = evol_alg.run()
+      (exec_time, best, best_iterations, iter, is_shortest_path_correct,
+       is_best_path_correct) = evol_alg.run()
 
-        result_file_name = test_case.split('/')[-1].split('.')[0] + '_result'
-        print(result_file_name)
-        save_result(FLAGS.output_dir, result_file_name, demand, timestamp,
-                    exec_time, iter, best_iterations, best[1],
-                    best[0][SHORTEST], best[0][BEST])
+      result_file_name = graph.split('/')[-1].split('.')[0] + '_result'
+      source = g.get_source()
+      target = g.get_target()
+      save_result(FLAGS.output_dir, result_file_name, timestamp, source, target,
+                  exec_time, iter, best_iterations, best[1],
+                  is_shortest_path_correct, is_best_path_correct,
+                  best[0][SHORTEST], best[0][BEST])
 
 
 if __name__ == '__main__':

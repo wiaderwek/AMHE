@@ -13,7 +13,7 @@ class Graph:
 
   def __init__(self, links, file_content: Dict[str, str]):
     self._links = self.load_links_to_map(links)
-    self._metadata, self._demands = self.parse_file_content(file_content)
+    self._metadata, _ = self.parse_file_content(file_content)
     self._source = self._metadata['source']
     self._target = self._metadata['target']
 
@@ -24,6 +24,12 @@ class Graph:
       self._vertices_for_generation.append(None)
 
     random.shuffle(self._vertices_for_generation)
+
+  def get_source(self):
+    return self._source
+
+  def get_target(self):
+    return self._target
 
   def parse_file_content(self, file_content: Dict[str, str]):
     demands: List[str] = []
@@ -95,8 +101,8 @@ class Graph:
   def get_l_y(self) -> float:
     return self._metadata['Ly']
 
-  def get_demands(self) -> List[str]:
-    return self._demands
+  # def get_demands(self) -> List[str]:
+  #   return self._demands
 
   def load_links_to_map(self, links):
     graph = dict()

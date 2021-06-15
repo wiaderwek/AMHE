@@ -3,8 +3,8 @@ from cost_func import CostFunc
 import random
 from typing import Dict, List, Tuple
 
-from constants import (BEST, MAX_BEST_OCCURRENECES, MAX_ITER, MUTATE_GEN_PROBABILITY,
-                       MUTATE_MEMBER_PROBABILITY,
+from constants import (BEST, MAX_BEST_OCCURRENECES, MAX_ITER,
+                       MUTATE_GEN_PROBABILITY, MUTATE_MEMBER_PROBABILITY,
                        MUTATE_MISSMATCHED_GEN_PROBABILITY_WEIGHT,
                        REPRODUCTION_POINT_DIVIDER, REPRODUCTION_PROBABILITY,
                        SHORTEST, SIZE_OF_POPULATION)
@@ -36,7 +36,13 @@ class Evolution():
       self._sort_and_crop_population()
       self._update_best()
 
-      if self._best_occurrences >= MAX_BEST_OCCURRENECES:
+      is_shortest_path_correct, is_best_path_correct = self.get_paths_correctness(
+      )
+
+      if self._best_occurrences >= MAX_BEST_OCCURRENECES and is_shortest_path_correct and is_best_path_correct:
+        self._log(1)
+        break
+      elif self._best_occurrences >= MAX_BEST_OCCURRENECES * 3:
         self._log(1)
         break
 
@@ -44,11 +50,24 @@ class Evolution():
 
     stop_time = time()
     exec_time = stop_time - start_time
-    return (exec_time, self._best, self._best_occurrences, self._iter)
+    is_shortest_path_correct, is_best_path_correct = self.get_paths_correctness(
+    )
+    return (exec_time, self._best, self._best_occurrences, self._iter,
+            is_shortest_path_correct, is_best_path_correct)
 
   # ---------------------------------- /main loop ---------------------------------
+  def get_paths_correctness(self):
+    is_shortest_path_correct = (
+        self._best[0][SHORTEST].get_num_of_correct_links() == len(
+            self._graph.get_path(self._best[0][SHORTEST].get_arcs())))
+    is_best_path_correct = (
+        self._best[0][BEST].get_num_of_correct_links() == len(
+            self._graph.get_path(self._best[0][BEST].get_arcs())))
+
+    return is_shortest_path_correct, is_best_path_correct
+
   def _update_best(self):
-    if self._best is None or not self._is_eq_to_best(self._population[0]):
+    if self._best is None or self._is_better_than_best(self._population[0]):
       self._best = self._population[0]
       self._best_occurrences = 0
 
@@ -57,9 +76,8 @@ class Evolution():
       self._best_occurrences += 1
       return self._best
 
-  def _is_eq_to_best(self, member: Tuple[Dict[str, Path], float]) -> bool:
-    if ((self._best[0][SHORTEST] == member[0][SHORTEST]) and
-        (self._best[0][BEST] == member[0][BEST])):  # noqa: E129
+  def _is_better_than_best(self, member: Tuple[Dict[str, Path], float]) -> bool:
+    if ((self._best[1] > member[1])):  # noqa: E129
       return True
 
     return False
