@@ -9,11 +9,11 @@ from evolution import Evolution
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string('data_dir',
-                    default='./data',
+                    default='data',
                     help='Path to input file containing dataset.')
 flags.DEFINE_string(
     'output_dir',
-    default='./results',
+    default='results',
     help='Path to output file where clastering results will be stored.')
 flags.DEFINE_string(
     'graph_path',
